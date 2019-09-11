@@ -6,20 +6,38 @@ import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
 import uuid from "uuid";
 
-let timer = null;
-
 class CreatePoll extends Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
+      id: null,
       question: {value: ''},
-      choices: [{index: 0, value: ''}, {index: 1, value: ''}, {index: 2, value: ''}]
+      choices: [{index: 0, value: ''}, {index: 1, value: ''}, {index: 2, value: ''}],
+      update: false
     };
     this.handleBlur = this.handleBlur.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.handleClear = this.handleClear.bind(this);
     this.handleSave = this.handleSave.bind(this);
+
+    if(this.props.match.params.id !== undefined)
+    {
+        this.getData();
+    }
+  }
+
+  getData = async () => {
+    const response = await axios.get(`http://localhost:3000/polls/${this.props.match.params.id}`);
+    const poll = JSON.parse(response.data.Poll);
+    const Id = response.data.Id;
+    console.log(poll.question.value)
+    this.setState((state, props) => ({
+       id: Id,
+       question: poll.question,
+       choices: poll.choices,
+       update: true
+    }));
   }
 
   handleBlur(index, val, type) {
@@ -64,7 +82,6 @@ class CreatePoll extends Component {
       question: {value: ""},
       choices: [{index: 0, value: ""}, {index: 1, value: ""}, {index: 2, value: ""}]
     }));
-    clearTimeout(timer);
   }
 
   handleSave = async event => {
@@ -75,11 +92,11 @@ class CreatePoll extends Component {
        'Content-Type': 'application/json'
     }
 
-    const response = await axios.post(`http://localhost:3000/create`, JSON.stringify(obj), {"headers" : headers});
+    const response = await axios.post(`http://localhost:3000/createEdit`, JSON.stringify(obj), {"headers" : headers});
 
     if(response.data.success) {
       toast.success(response.data.msg);
-      timer = setTimeout(() => {
+      setTimeout(() => {
         this.clear();
       }, 1500);
     }
@@ -105,28 +122,27 @@ class CreatePoll extends Component {
           <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>save</Icon></button>
         </Tooltip>
         <Tooltip title="Clear">
-          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>undo</Icon></button>
+          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleClear}>undo</Icon></button>
         </Tooltip>
 
         <Input
-          text="Question"
-          val={question.value}
-          handleBlur={this.handleBlur}
-          cntrltype='question'
-          placeholder="Question Text"
-          style={{width: '550px'}}
-           />
+            text="Question"
+            val={question.value}
+            handleBlur={this.handleBlur}
+            cntrltype='question'
+            placeholder="Question Text"
+            style={{width: '550px'}}
+          />
           {
-            this.state.choices.map(choice => <Input key={choice.index}
-              text="Choice"
-              val={choice.value}
-              handleBlur={this.handleBlur}
-              handledelete={this.handleDelete}
-              cntrltype='choice'
-              placeholder="Choice Text"
-              index={choice.index}
-              />
-            )
+              this.state.choices.map(choice => <Input key={choice.index}
+                  text="Choice"
+                  val={choice.value}
+                  handleBlur={this.handleBlur}
+                  handledelete={this.handleDelete}
+                  cntrltype='choice'
+                  placeholder="Choice Text"
+                  index={choice.index} />
+               )
           }
       </form>
     );

@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Poll from './Poll.jsx';
 import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export default class Polls extends Component {
   constructor(){
@@ -34,9 +35,15 @@ export default class Polls extends Component {
       <form class=" border border-light p-5">
           {(this.state.polls || []).map(item => (
             <div className="form-row mb-4" key={item.Id}>
-              <Link to={`/edit/${item.Id}`}><Icon>edit</Icon></Link>          
-              <Link to={`/answers/${item.Id}`}><Icon>history</Icon></Link>
-              <Link to={`/polls/${item.Id}`}><Icon>add_circle</Icon></Link>
+              <Tooltip title="Edit">
+                <Link to={`/edit/${item.Id}`}><Icon>edit</Icon></Link>
+              </Tooltip>
+              <Tooltip title="Answers">
+                <Link to={`/answers/${item.Id}`}><Icon>history</Icon></Link>
+              </Tooltip>
+              <Tooltip title="Answer Question">
+                <Link to={`/polls/${item.Id}`}><Icon>add_circle</Icon></Link>
+              </Tooltip>
               <div class="col" key={item.Id}>{this.getQuestion(item.Poll)}</div>
             </div>
           ))}

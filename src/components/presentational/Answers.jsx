@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-var ReactBsTable  = require('react-bootstrap-table');
-var BootstrapTable = ReactBsTable.BootstrapTable;
-var TableHeaderColumn = ReactBsTable.TableHeaderColumn;
+import BootstrapTable from 'react-bootstrap-table-next';
+import Moment from 'react-moment';
 import axios from 'axios';
 
 export default class Answers extends Component {
@@ -19,17 +18,41 @@ export default class Answers extends Component {
     }));
   }
 
+  dateFormatter = (cell, row) => {
+    return (
+        <span>
+         <Moment date={cell}  format="MM/DD/YYYY HH:mm" />
+        </span>
+    );
+  }
+
   componentDidMount() {
     this.getData();
   }
 
-  render() { 
+  render() {
+    const columns = [{
+        dataField: 'User',
+        text: 'User Id'
+      }, {
+        dataField: 'Answer',
+        text: 'Answer'
+      }, {
+        dataField: 'Date',
+        text: 'Date Answered',
+        formatter: this.dateFormatter
+      }];
+
     return (
       <div>
-      <BootstrapTable data={this.state.Answers} striped hover>
-        <TableHeaderColumn isKey dataField='User'>User</TableHeaderColumn>
-        <TableHeaderColumn dataField='Answer'>Answer</TableHeaderColumn>
-      </BootstrapTable>
+         <BootstrapTable
+            keyField='User'
+            data={this.state.Answers}
+            columns={columns}
+            striped
+            hover
+            condensed
+            />
       </div>
     )
   }

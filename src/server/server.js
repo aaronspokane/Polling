@@ -41,7 +41,7 @@ app.get('/answers/:id', (req, res) => {
 })
 
 app.get('/polls/:id', (req, res) => {
-  let sql = `SELECT Poll FROM Polls WHERE Id = ?`;
+  let sql = `SELECT * FROM Polls WHERE Id = ?`;
   db.get(sql, [req.params.id], (err, row) => {
     if (err) {
       console.error(err.message);
@@ -52,17 +52,30 @@ app.get('/polls/:id', (req, res) => {
   });
 });
 
-app.post('/create', function(req, res) {
+app.post('/createEdit', function(req, res) {
   let _response = '';
   const poll = req.body;
+  const pollData = {question: poll.data.question, choices: poll.data.choices};
   try {
-    db.run('INSERT INTO Polls(ID, Poll) VALUES(?, ?)', [poll.Id, JSON.stringify(poll.data)], (err) => {
-      if (err) {
-          res.json({success: false, msg: err.message});
-      } else {
-          res.json({success: true, msg: "Poll Created"});
-      }
-    });
+    if(poll.data.update)
+    {
+      db.run('UPDATE Polls SET Poll = ? WHERE Id = ?', [JSON.stringify(pollData), poll.data.id], (err) => {
+        if (err) {
+            res.json({success: false, msg: err.message});
+        } else {
+            res.json({success: true, msg: "Poll Updated"});
+        }
+      });
+
+    } else {
+      db.run('INSERT INTO Polls(ID, Poll) VALUES(?, ?)', [poll.Id, JSON.stringify(pollData)], (err) => {
+        if (err) {
+            res.json({success: false, msg: err.message});
+        } else {
+            res.json({success: true, msg: "Poll Created"});
+        }
+      });
+  }
 
   } catch (err) {
     res.json({success: false, msg: err.message});
@@ -120,7 +133,7 @@ app.post('/answers/create/:id', function(req, res) {
       return result;
     })
     .then(function(result) {
-      db.run('INSERT INTO Answers(ID, Answer, User) VALUES(?, ?, ?)', [Id, poll.answer, result.Id], (err) => {
+      db.run('INSERT INTO Answers(ID, Answer, User, Date) VALUES(?, ?, ?, ?)', [Id, poll.answer, result.Id, Date.now()], (err) => {
         if (err) {
           res.send(err.message);
         } else {
