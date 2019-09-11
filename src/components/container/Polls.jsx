@@ -1,12 +1,14 @@
 import React, { Component } from "react";
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Poll from './Poll.jsx';
+import Icon from '@material-ui/core/Icon';
 
 export default class Polls extends Component {
   constructor(){
     super();
     this.state = {
-      polls: []      
+      polls: []
     }
   }
 
@@ -31,7 +33,12 @@ export default class Polls extends Component {
     return (
       <form class=" border border-light p-5">
           {(this.state.polls || []).map(item => (
-            <div className="form-row mb-4" key={item.Id}><Link className="btn btn-success btn-xs" to={`/polls/${item.Id}`}>GO</Link><div class="col" key={item.Id}>{this.getQuestion(item.Poll)}</div></div>
+            <div className="form-row mb-4" key={item.Id}>
+              <Link to={`/edit/${item.Id}`}><Icon>edit</Icon></Link>          
+              <Link to={`/answers/${item.Id}`}><Icon>history</Icon></Link>
+              <Link to={`/polls/${item.Id}`}><Icon>add_circle</Icon></Link>
+              <div class="col" key={item.Id}>{this.getQuestion(item.Poll)}</div>
+            </div>
           ))}
       </form>
     )

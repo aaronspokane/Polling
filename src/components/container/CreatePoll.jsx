@@ -1,7 +1,12 @@
 import React, { Component } from "react";
-import Input from "../presentational/Input.jsx";
+import Input from "./Input.jsx";
+import { ToastContainer, toast } from 'react-toastify';
+import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
 import uuid from "uuid";
+
+let timer = null;
 
 class CreatePoll extends Component {
   constructor() {
@@ -25,7 +30,7 @@ class CreatePoll extends Component {
       }));
     } else {
       let array = [...this.state.choices];
-      var item = this.state.choices.filter(x => x.index === parseInt(index));
+      var item = array.filter(x => x.index === parseInt(index));
       item[0].value = val;
       this.setState((state,props) => ({
         choices: array
@@ -50,11 +55,16 @@ class CreatePoll extends Component {
 
   handleClear(event) {
     event.preventDefault();
+    this.clear();
+  }
+
+  clear = () => {
     let array = [...this.state.choices];
     this.setState((state, props) => ({
       question: {value: ""},
       choices: [{index: 0, value: ""}, {index: 1, value: ""}, {index: 2, value: ""}]
     }));
+    clearTimeout(timer);
   }
 
   handleSave = async event => {
@@ -66,17 +76,38 @@ class CreatePoll extends Component {
     }
 
     const response = await axios.post(`http://localhost:3000/create`, JSON.stringify(obj), {"headers" : headers});
-    console.log(response);
+
+    if(response.data.success) {
+      toast.success(response.data.msg);
+      timer = setTimeout(() => {
+        this.clear();
+      }, 1500);
+    }
+    else
+      toast.error(response.data.msg);
   }
 
   render() {
     var { question } = this.state;
     return (
       <form class="text-center border border-light p-5">
+        <ToastContainer
+            position="top-center"
+            autoClose={5000}
+            closeOnClick
+            hideProgressBar={true}
+        />
 
-        <button type="button" className="btn btn-primary btn-sm mr-1" onClick={this.handleAdd}>Add New Choice</button>
-        <button type="button" className="btn btn-primary btn-sm mr-1" onClick={this.handleSave}>Save</button>
-        <button type="button" className="btn btn-primary btn-sm mr-1" onClick={this.handleClear}>Clear</button>
+        <Tooltip title="Add">
+          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleAdd}>add</Icon></button>
+        </Tooltip>
+        <Tooltip title="Save">
+          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>save</Icon></button>
+        </Tooltip>
+        <Tooltip title="Clear">
+          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>undo</Icon></button>
+        </Tooltip>
+
         <Input
           text="Question"
           val={question.value}

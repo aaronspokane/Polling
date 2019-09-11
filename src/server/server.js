@@ -1,5 +1,5 @@
 const express = require('express');
-const database = new(require('../db/db'))();
+const db = require('../db/db');
 const app = express();
 const ip = require("ip");
 
@@ -12,29 +12,42 @@ app.use(function(req, res, next) {
 });
 
 app.get('/polls', (req, res) => {
-  let _response = '';
   let _rows = [];
   try {
-    database.db.all(`SELECT ID, Poll FROM Polls`, [], (err, rows) => {
+    db.all(`SELECT ID, Poll FROM Polls`, [], (err, rows) => {
       if (err) {
         console.log(err.message);
       } else {
-        res.send(JSON.stringify(rows));
+        res.json(rows);
       }
     });
   } catch (err) {
     console.log(err.message);
-    res.send(JSON.stringify(_rows));
+    res.json(_rows);
   }
 });
 
-app.get('/polls/:Id', (req, res) => {
+app.get('/answers/:id', (req, res) => {
+  try {
+    db.all(`SELECT * FROM Answers where Id = ?`, [req.params.id], (err, rows) => {
+      if(err) {
+          res.json([]);
+      }
+      res.json(rows);
+    });
+  } catch(err) {
+    res.json([]);
+  }
+})
+
+app.get('/polls/:id', (req, res) => {
   let sql = `SELECT Poll FROM Polls WHERE Id = ?`;
-  database.db.get(sql, [req.params.Id], (err, row) => {
+  db.get(sql, [req.params.id], (err, row) => {
     if (err) {
       console.error(err.message);
+      res.json([]);
     } else {
-      res.send(JSON.stringify(row));
+      res.json(row);
     }
   });
 });
@@ -43,18 +56,17 @@ app.post('/create', function(req, res) {
   let _response = '';
   const poll = req.body;
   try {
-    database.db.run('INSERT INTO Polls(ID, Poll) VALUES(?, ?)', [poll.Id, JSON.stringify(poll.data)], (err) => {
+    db.run('INSERT INTO Polls(ID, Poll) VALUES(?, ?)', [poll.Id, JSON.stringify(poll.data)], (err) => {
       if (err) {
-        _response = err.message;
+          res.json({success: false, msg: err.message});
       } else {
-        console.log('Row added...');
+          res.json({success: true, msg: "Poll Created"});
       }
     });
 
-  } catch (error) {
-    _response = error;
+  } catch (err) {
+    res.json({success: false, msg: err.message});
   }
-  res.send(_response);
 });
 
 function Answer(req, res) {
@@ -66,12 +78,12 @@ function Answer(req, res) {
 
     try {
 
-      database.db.get("SELECT Id FROM Users WHERE Id = ?", [_ip], (err, row) => {
+      db.get("SELECT Id FROM Users WHERE Id = ?", [_ip], (err, row) => {
         if (err) {
           reject(err.message);
         } else {
           if (typeof row == "undefined") {
-            database.db.run('INSERT INTO Users(ID, Info) VALUES(?, ?)', [_ip, _agent], (err) => {
+            db.run('INSERT INTO Users(ID, Info) VALUES(?, ?)', [_ip, _agent], (err) => {
               if (err) {
                 console.log(err.message);
                 reject(err.message);
@@ -100,15 +112,15 @@ function Answer(req, res) {
 }
 
 
-app.post('/answers/create/:Id', function(req, res) {
+app.post('/answers/create/:id', function(req, res) {
   const answer = Answer(req, res);
-  const Id = req.params.Id;
+  const Id = req.params.id;
   const poll = req.body;
   answer.then(function(result) {
       return result;
     })
     .then(function(result) {
-      database.db.run('INSERT INTO Answers(ID, Answer, User) VALUES(?, ?, ?)', [Id, poll.answer, result.Id], (err) => {
+      db.run('INSERT INTO Answers(ID, Answer, User) VALUES(?, ?, ?)', [Id, poll.answer, result.Id], (err) => {
         if (err) {
           res.send(err.message);
         } else {

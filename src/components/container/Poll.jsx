@@ -5,7 +5,7 @@ export default class Poll extends Component {
   constructor(props){
     super(props);
     this.state = {
-      Id: this.props.match.params.Id,
+      Id: this.props.match.params.id,
       question: {value: ""},
       choices: [],
       selectedIndex: null,
@@ -18,13 +18,13 @@ export default class Poll extends Component {
 
   handleSave = async event => {
     event.preventDefault();
-    const obj = {Id: this.state.Id, answer: this.state.selectedValue};
+    const obj = {Id: this.state.id, answer: this.state.selectedValue};
 
     var headers = {
        'Content-Type': 'application/json'
     }
 
-    const response = await axios.post(`http://localhost:3000/answers/create/${this.props.match.params.Id}`, JSON.stringify(obj), {"headers" : headers});
+    const response = await axios.post(`http://localhost:3000/answers/create/${this.props.match.params.id}`, JSON.stringify(obj), {"headers" : headers});
     console.log(response);
   }
 
@@ -38,7 +38,7 @@ export default class Poll extends Component {
   }
 
   getData = async () => {
-    const response = await axios.get(`http://localhost:3000/polls/${this.props.match.params.Id}`);
+    const response = await axios.get(`http://localhost:3000/polls/${this.props.match.params.id}`);
     const poll = JSON.parse(response.data.Poll);
     console.log(poll.question.value)
     this.setState((state, props) => ({

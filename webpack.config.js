@@ -16,7 +16,7 @@ module.exports = {
         use: [
           {
             loader: "html-loader"
-          }
+          }          
         ]
       }
     ]
@@ -28,6 +28,8 @@ module.exports = {
     })
   ],
   devServer: {
-    historyApiFallback: true
+    historyApiFallback: true,
+    contentBase: './',
+    hot: true
   }
 };
