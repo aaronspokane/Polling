@@ -124,6 +124,20 @@ function Answer(req, res) {
   });
 }
 
+app.post('/removePoll', function(req, res) {
+  const id = req.body.id;
+  try {
+      db.run('DELETE from Polls WHERE Id = ?', [id], (err) => {
+        if (err) {
+          res.json({success: false, msg: err.message});
+        } else {
+          res.json({success: true, msg: "Poll Removed"});
+        }
+      })
+  } catch(err) {
+    res.json({success: false, msg: err.message});
+  }
+});
 
 app.post('/answers/create/:id', function(req, res) {
   const answer = Answer(req, res);
@@ -135,14 +149,14 @@ app.post('/answers/create/:id', function(req, res) {
     .then(function(result) {
       db.run('INSERT INTO Answers(ID, Answer, User, Date) VALUES(?, ?, ?, ?)', [Id, poll.answer, result.Id, Date.now()], (err) => {
         if (err) {
-          res.send(err.message);
+          res.json({success: false, msg: err.message});
         } else {
-          res.send("");
+          res.json({success: true, msg: "Poll Answered"});
         }
       });
     })
     .catch(function(err) {
-      console.log(err.message);
+      res.json({success: false, msg: err.message});
     });
 });
 

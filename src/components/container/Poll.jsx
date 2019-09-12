@@ -1,5 +1,8 @@
 import React, { Component } from "react";
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import Icon from '@material-ui/core/Icon';
+import Tooltip from '@material-ui/core/Tooltip';
 
 export default class Poll extends Component {
   constructor(props){
@@ -25,7 +28,14 @@ export default class Poll extends Component {
     }
 
     const response = await axios.post(`http://localhost:3000/answers/create/${this.props.match.params.id}`, JSON.stringify(obj), {"headers" : headers});
-    console.log(response);
+    if(response.data.success) {
+        toast.success(<div class="text-center">{response.data.msg}</div>);
+        setTimeout(() => {
+          this.props.history.push('/');
+        }, 1500);
+    }
+    else
+        toast.error(response.data.msg);
   }
 
   handleChange(event) {
@@ -54,6 +64,12 @@ export default class Poll extends Component {
   render() {
     return (
       <form class=" border border-light p-5">
+      <ToastContainer
+          position="top-center"
+          autoClose={5000}
+          closeOnClick
+          hideProgressBar={true}
+      />
        <label>{this.state.question.value}</label>
        { (this.state.choices || []).map((choice, index) => (
           <div class="custom-control custom-radio" key={index}>
@@ -63,7 +79,10 @@ export default class Poll extends Component {
         ))
        }
        <br />
-      <button type="button" className="btn btn-primary btn-sm mr-1" onClick={this.handleSave}>Save</button>
+
+      <Tooltip title="Save">
+        <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>save</Icon></button>
+      </Tooltip>
       </form>
     )
   }
