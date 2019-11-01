@@ -1,8 +1,9 @@
 import React, { Component } from "react";
-import axios from 'axios';
+import * as api from '../../api/';
 import { ToastContainer, toast } from 'react-toastify';
 import Icon from '@material-ui/core/Icon';
 import Tooltip from '@material-ui/core/Tooltip';
+import Toolbar from '../presentational/Toolbar.jsx';
 
 export default class Poll extends Component {
   constructor(props){
@@ -23,11 +24,7 @@ export default class Poll extends Component {
     event.preventDefault();
     const obj = {Id: this.state.id, answer: this.state.selectedValue};
 
-    var headers = {
-       'Content-Type': 'application/json'
-    }
-
-    const response = await axios.post(`http://localhost:3000/answers/create/${this.props.match.params.id}`, JSON.stringify(obj), {"headers" : headers});
+    const response = await api.post(`/answers/create/${this.props.match.params.id}`, obj);
     if(response.data.success) {
         toast.success(<div class="text-center">{response.data.msg}</div>);
         setTimeout(() => {
@@ -48,9 +45,8 @@ export default class Poll extends Component {
   }
 
   getData = async () => {
-    const response = await axios.get(`http://localhost:3000/polls/${this.props.match.params.id}`);
-    const poll = JSON.parse(response.data.Poll);
-    console.log(poll.question.value)
+    const response = await api.get(`/polls/${this.props.match.params.id}`);
+    const poll = JSON.parse(response.data.Poll);    
     this.setState((state, props) => ({
        question: poll.question,
        choices: poll.choices
@@ -70,6 +66,13 @@ export default class Poll extends Component {
           closeOnClick
           hideProgressBar={true}
       />
+      <div class="text-center">
+      <Toolbar
+        handleSave={this.handleSave}
+        AnswerOnly={true}
+       />
+       </div>
+       <br />
        <label>{this.state.question.value}</label>
        { (this.state.choices || []).map((choice, index) => (
           <div class="custom-control custom-radio" key={index}>
@@ -78,11 +81,6 @@ export default class Poll extends Component {
           </div>
         ))
        }
-       <br />
-
-      <Tooltip title="Save">
-        <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>save</Icon></button>
-      </Tooltip>
       </form>
     )
   }

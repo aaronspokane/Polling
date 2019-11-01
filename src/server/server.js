@@ -54,8 +54,9 @@ app.get('/polls/:id', (req, res) => {
 
 app.post('/createEdit', function(req, res) {
   let _response = '';
-  const poll = req.body;
+  const poll = req.body;  
   const pollData = {question: poll.data.question, choices: poll.data.choices};
+
   try {
     if(poll.data.update)
     {

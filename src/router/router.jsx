@@ -1,18 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Link, NavLink, Switch, BrowserRouter as Router } from 'react-router-dom';
-import Polls from '../container/Polls.jsx';
-import Poll from '../container/Poll.jsx';
-import CreateEditPoll from '../container/CreateEditPoll.jsx';
-import EditPoll from '../container/Edit.jsx';
-import Notfound from '../presentational/NotFound.jsx';
-import Answers from '../presentational/Answers.jsx';
+import Polls from '../components/container/Polls.jsx';
+import Poll from '../components/container/Poll.jsx';
+import CreateEditPoll from '../components/container/CreateEditPoll.jsx';
+import Notfound from '../components/presentational/NotFound.jsx';
+import Answers from '../components/container/Answers.jsx';
 import { Navbar, Nav } from 'react-bootstrap';
 
 const routing = (
   <Router>
     <div>
-      <Navbar bg="primary" variant="dark">
+      <Navbar bg="primary" variant="dark" expand="lg">
         <Nav className="mr-auto">
           <Nav.Link as={NavLink} to='/' exact>Home</Nav.Link>
           <Nav.Link as={NavLink} to='/create'>Create New</Nav.Link>

@@ -1,9 +1,8 @@
 import React, { Component } from "react";
 import Input from "./Input.jsx";
 import { ToastContainer, toast } from 'react-toastify';
-import Icon from '@material-ui/core/Icon';
-import Tooltip from '@material-ui/core/Tooltip';
-import axios from 'axios';
+import * as api from '../../api/';
+import Toolbar from '../presentational/Toolbar.jsx';
 import uuid from "uuid";
 
 class CreatePoll extends Component {
@@ -20,7 +19,7 @@ class CreatePoll extends Component {
     this.handleDelete = this.handleDelete.bind(this);
     this.handleClear = this.handleClear.bind(this);
     this.handleSave = this.handleSave.bind(this);
-    this.handleRemovePoll = this.handleRemovePoll.bind(this);
+    this.handleRemove = this.handleRemove.bind(this);
   }
 
   componentDidMount() {
@@ -31,7 +30,7 @@ class CreatePoll extends Component {
   }
 
   getData = async () => {
-    const response = await axios.get(`http://localhost:3000/polls/${this.props.match.params.id}`);
+    const response = await api.get(`/polls/${this.props.match.params.id}`);
     const poll = JSON.parse(response.data.Poll);
     const Id = response.data.Id;
 
@@ -79,22 +78,9 @@ class CreatePoll extends Component {
     this.clear();
   }
 
-  clear = () => {
-    let array = [...this.state.choices];
-    this.setState((state, props) => ({
-      question: {value: ""},
-      choices: [{index: 0, value: ""}, {index: 1, value: ""}, {index: 2, value: ""}]
-    }));
-  }
-
-  handleRemovePoll = async event => {
+  handleRemove = async event => {
     event.preventDefault();
-
-    var headers = {
-       'Content-Type': 'application/json'
-    }
-
-    const response = await axios.post(`http://localhost:3000/removePoll`, {id: this.state.id});
+    const response = await api.post(`/removePoll`, {id: this.state.id});
 
     if(response.data.success) {
       toast.success(response.data.msg);
@@ -108,7 +94,7 @@ class CreatePoll extends Component {
 
   handleSave = async event => {
     event.preventDefault();
-    const choiceAvailable = (this.state.choices || []).filter(x => x.value.length > 0);
+    const choiceAvailable = (this.state.choices || []).filter(x => x.value.length > 0 && x.value !== 'Choice Text');
     if(this.state.question.value.length <= 0 || choiceAvailable.length <= 0)
     {
       toast.error("Question cannot be blank and there must be at least one available choice.");
@@ -117,11 +103,7 @@ class CreatePoll extends Component {
 
     const obj = {Id: uuid.v4(), data: this.state};
 
-    var headers = {
-       'Content-Type': 'application/json'
-    }
-
-    const response = await axios.post(`http://localhost:3000/createEdit`, JSON.stringify(obj), {"headers" : headers});
+    const response = await api.post(`/createEdit`, obj);
 
     if(response.data.success) {
       toast.success(response.data.msg);
@@ -131,6 +113,13 @@ class CreatePoll extends Component {
     }
     else
       toast.error(response.data.msg);
+  }
+
+  clear = () => {
+    this.setState((state, props) => ({
+      question: {value: ""},
+      choices: [{index: 0, value: ""}, {index: 1, value: ""}, {index: 2, value: ""}]
+    }));
   }
 
   render() {
@@ -143,23 +132,14 @@ class CreatePoll extends Component {
             closeOnClick
             hideProgressBar={true}
         />
-
-        <Tooltip title="Add">
-          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleAdd}>add</Icon></button>
-        </Tooltip>
-        <Tooltip title="Save">
-          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleSave}>save</Icon></button>
-        </Tooltip>
-        <Tooltip title="Clear">
-          <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleClear}>undo</Icon></button>
-        </Tooltip>
-        {
-          this.state.update ?
-              <Tooltip title="Remove Poll">
-                  <button type="button" className="btn btn-primary btn-sm mr-1"><Icon className="align-middle" onClick={this.handleRemovePoll}>delete</Icon></button>
-              </Tooltip>
-              : null
-        }
+        <Toolbar
+          handleAdd={this.handleAdd}
+          handleSave={this.handleSave}
+          handleClear={this.handleClear}
+          handleRemove={this.handleRemove}
+          update={this.state.update}
+          AnswerOnly={false}
+         />
         <Input
             text="Question"
             val={question.value}

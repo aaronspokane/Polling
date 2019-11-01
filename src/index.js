@@ -1,1 +1,1 @@
-import Poll from "./components/router/router.jsx";
+import Poll from "./router/router.jsx";

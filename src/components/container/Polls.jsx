@@ -1,9 +1,7 @@
 import React, { Component } from "react";
-import axios from 'axios';
-import { Link } from 'react-router-dom';
 import Poll from './Poll.jsx';
-import Icon from '@material-ui/core/Icon';
-import Tooltip from '@material-ui/core/Tooltip';
+import Actionbar from '../presentational/Actionbar.jsx';
+import * as api from '../../api/';
 
 export default class Polls extends Component {
   constructor(){
@@ -14,7 +12,7 @@ export default class Polls extends Component {
   }
 
   getData = async () => {
-    const response = await axios.get(`http://localhost:3000/polls`);
+    const response = await api.get('/polls');
     this.setState((state, props) => ({
         polls: response.data
     }));
@@ -24,28 +22,11 @@ export default class Polls extends Component {
     this.getData();
   }
 
-  getQuestion(obj)
-  {
-    const q = JSON.parse(obj);
-    return q.question.value;
-  }
-
   render() {
     return (
       <form class=" border border-light p-5">
-          {(this.state.polls || []).map(item => (
-            <div className="form-row mb-4" key={item.Id}>
-              <Tooltip title="Edit">
-                <Link to={`/edit/${item.Id}`}><Icon>edit</Icon></Link>
-              </Tooltip>
-              <Tooltip title="Answers">
-                <Link to={`/answers/${item.Id}`}><Icon>history</Icon></Link>
-              </Tooltip>
-              <Tooltip title="Answer Question">
-                <Link to={`/polls/${item.Id}`}><Icon>add_circle</Icon></Link>
-              </Tooltip>
-              <div class="col" key={item.Id}>{this.getQuestion(item.Poll)}</div>
-            </div>
+          {(this.state.polls || []).map(item => (          
+            <Actionbar Poll={item} key={item.Id} />
           ))}
       </form>
     )

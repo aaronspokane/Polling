@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import BootstrapTable from 'react-bootstrap-table-next';
 import Moment from 'react-moment';
-import axios from 'axios';
+import * as api from '../../api/';
 
 export default class Answers extends Component {
   constructor(props) {
@@ -12,7 +12,7 @@ export default class Answers extends Component {
   }
 
   getData = async (event) => {
-    const response = await axios.get(`http://localhost:3000/answers/${this.props.match.params.id}`);
+    const response = await api.get(`/answers/${this.props.match.params.id}`);
     this.setState((state, props) => ({
         Answers: response.data
     }));
